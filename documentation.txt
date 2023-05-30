@@ -1,0 +1,74 @@
+Summary of code
+
+I have created 3 data entities defined in entities.py class - Customer, Loan and Payment. Each entity has the following property as given below:
+	Customer : name, password, has_a_loan
+	Loan : loan_id, customer_name, tenure, total_amount, amount_paid, payments, instalments_paid, status
+	Payment : payment_id, loan_id, instalment_number, instalment_amount, is_paid
+Also created an ENUM named Status which will be used further. [PENDING, APPROVED, PAID]
+
+Based on the data classes or entities mentioned above I have defined services for each, describing services of each entity
+below in brief:
+	customer_service : 
+		register_customer : It takes name(unique) and password as parameters and registers the user to further login, view their details, apply for loan and make payment of instalments. 
+		login_customer : It takes name(unique) and password from customer and return all the details related to his/her account.
+		
+		For eg:.
+		{
+    		"name": "user_test",
+   			"password": "p"
+		}
+		
+		Above example works for both the API.
+
+	loan_service:
+		apply_loan : It takes customer_name, loan_amount and loan_tenure as parameters in json form and sends the notification to admin for approval. 
+        For eg.
+		{
+			"customer_name": "user_test",
+			"amount": 100,
+			"tenure": 10
+		}
+
+		loan_details : It takes customer_name and password as parameters from customer and show them details. This method can also be used by admin to view the pending and approved loans details. Parameters for admin will be its associated admin_name and password. For eg. 
+		{
+    		"name": "user_test",
+   			"password": "p"
+		}
+
+		approve_loan : This method can only be used by admin to approve loans. It takes user name(admin), password(admin) and 					customer_name(get from above view_loan_details API) as parameters and allows him to approve for the same. For eg.
+		{
+			"name": "admin",
+    		"password" : "password",
+     		"customer_name": "user_test"
+		}
+	
+	payment_service:
+		make_payment: It takes customer_name and instalment amount from customer and completes the payment. For eg.
+		{
+			"name": "user_test",
+			"amount": 50
+		}
+
+In place of database, I have created in-memory storage in the form of dictionary. Describing each of them below:
+
+	customer_info_storage : It stores customer information in the form of a dictionary having key as customer’s user name and Customer class object as value. The get and store method of this storage class helps in fetch and store the customer’s data respectively.
+	
+	loan_info_storage : Similar to customer_info_storage, it stores info related to loan corresponding to each customer. The get and store method of this storage class helps in fetch and store the customer’s data respectively.
+
+Please note that each service API will take parameters in the form of json and postman can be used to hit each API where parameters will be passed under body.
+
+X------X------X------X------X------X------X------X------X------X------X------X------X------X------X
+
+Tech details:
+
+I've created the app in python using Flask framework. Flask is a micro web framework written in Python.
+Flask is a popular choice for developing web applications because it is easy to learn and use. It is also very flexible, which allows developers to create a wide variety of applications.
+
+I've also used poetry to manage dependencies. 
+It can be used to install, update, and remove dependencies, and it can also create virtual environments for your projects.
+
+X------X------X------X------X------X------X------X------X------X------X------X------X------X------X
+
+PLEASE NOTE:
+
+I've already created an admin user with credentials {"name" : "admin", "password" : "password"}. You won't be able to create another admin user apart from this. Please use these credentials to view or approve loans.

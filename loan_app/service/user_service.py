@@ -1,8 +1,9 @@
 from flask import jsonify
 from loan_app.enities import Customer, Loan
-from loan_app.storage.customer_info import get_customer_information_storage_instance
-from loan_app.storage.loan_info import get_loan_information_storage_instance
-from loan_app.storage.payment_info import get_payment_information_storage_instance
+from loan_app.storage.customer_info_storage import (
+    get_customer_information_storage_instance,
+)
+from loan_app.storage.loan_info_storage import get_loan_information_storage_instance
 from loan_app.utils.authentication_utils import (
     authenticate_user,
     check_name_and_password_are_provided,
@@ -10,10 +11,9 @@ from loan_app.utils.authentication_utils import (
 
 
 def register_customer(customer_details):
-    if (
-        check_name_and_password_are_provided(customer_details)
-        and customer_details["name"] != "admin"
-    ):
+    if check_name_and_password_are_provided(customer_details):
+        if customer_details["name"] == "admin":
+            return "You are trying to register as an admin which is not allowed. Please try some other username"
         customer = Customer(
             name=customer_details["name"],
             password=customer_details["password"],
@@ -36,16 +36,9 @@ def login_customer(customer_details):
             customer_details["name"]
         )
 
-        payment_info = "No corresponding payments found for loan"
-        if isinstance(loan_info, Loan):
-            payment_info = get_payment_information_storage_instance().get_payment_info(
-                customer_details["name"]
-            )
-
         output = {
             "customer_info": customer_info,
             "loan_info": loan_info,
-            "payment_info": payment_info,
         }
 
         return jsonify(output)

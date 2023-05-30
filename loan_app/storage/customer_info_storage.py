@@ -6,6 +6,7 @@ _instance_var = None
 class CustomerInformationStorage:
     def __init__(self, customer_data: dict) -> None:
         self.customer_data_dict = customer_data
+        self.store_customer_data(Customer("admin", "password", False))
 
     def get_customer_data(self, customer_name: str):
         if customer_name in self.customer_data_dict:
@@ -13,7 +14,7 @@ class CustomerInformationStorage:
         else:
             return "Customer doesn't exist"
 
-    def store_customer_data(self, customer_data: Customer) -> None:
+    def store_customer_data(self, customer_data: Customer) -> str:
         if customer_data.name in self.customer_data_dict:
             return "Customer already exists"
         else:

@@ -2,24 +2,32 @@ from flask import Flask, request
 from loan_app.enities import Customer
 
 from loan_app.service import loan_service, user_service, payment_service
-from loan_app.storage.customer_info import get_customer_information_storage_instance
+from loan_app.storage.customer_info_storage import (
+    get_customer_information_storage_instance,
+)
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return "Hello, world!"
+    customer = Customer(
+        name="admin",
+        password="password",
+        has_a_loan=False,
+    )
+    get_customer_information_storage_instance().store_customer_data(customer)
+    return "Welcome to Loan-App"
 
 
-@app.route("/register")
-def register():
-    return user_service.register_user(request.get_json())
+@app.route("/register_customer")
+def register_customer():
+    return user_service.register_customer(request.get_json())
 
 
-@app.route("/login")
-def login():
-    return user_service.login_user(request.get_json())
+@app.route("/login_customer")
+def login_customer():
+    return user_service.login_customer(request.get_json())
 
 
 @app.route("/apply_loan")
@@ -34,7 +42,7 @@ def view_loan_details():
 
 @app.route("/pay_installment")
 def pay_loan_installment():
-    return payment_service.make_payment(request.get_json())
+    return payment_service.pay_installment(request.get_json())
 
 
 @app.route("/approve_loan")
@@ -43,10 +51,4 @@ def approve_loan():
 
 
 if __name__ == "__main__":
-    customer = Customer(
-        name="admin",
-        password="password",
-        has_a_loan=False,
-    )
-    get_customer_information_storage_instance().store_customer_data(customer)
     app.run(debug=True)

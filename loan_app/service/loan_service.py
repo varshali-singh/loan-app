@@ -2,8 +2,10 @@ from uuid import uuid4
 
 from flask import jsonify
 from loan_app.enities import Customer, Loan, Payment, Status
-from loan_app.storage.customer_info import get_customer_information_storage_instance
-from loan_app.storage.loan_info import get_loan_information_storage_instance
+from loan_app.storage.customer_info_storage import (
+    get_customer_information_storage_instance,
+)
+from loan_app.storage.loan_info_storage import get_loan_information_storage_instance
 from loan_app.utils.authentication_utils import (
     authenticate_user,
     check_name_and_password_are_provided,
@@ -12,14 +14,14 @@ from loan_app.utils.authentication_utils import (
 
 
 def apply_for_loan(loan_details):
-    if validate_loan_details(loan_details):
+    if not validate_loan_details(loan_details):
         return "Please pass correct parameters for loan details."
 
-    if loan_details["name"] == "admin":
+    if loan_details["customer_name"] == "admin":
         return "You're logged in as an admin. Please login as a customer."
 
     customer_data = get_customer_information_storage_instance().get_customer_data(
-        loan_details["name"]
+        loan_details["customer_name"]
     )
 
     if isinstance(customer_data, Customer):
@@ -37,19 +39,19 @@ def apply_for_loan(loan_details):
 
         loan = Loan(
             loan_id,
-            loan_details["name"],
+            loan_details["customer_name"],
             loan_tenure,
             loan_amount,
-            0,
+            0.0,
             payments,
             0,
             Status.PENDING.name,
         )
 
         get_loan_information_storage_instance().store_loan_info(loan)
-        return "Applied for loan successfully"
+        return "Applied for loan successfully, pending for admin approval"
     else:
-        return "Please provide correct loan details or maybe you're logged in as admin. Please login as a registered user"
+        return "Please login as a registered user"
 
 
 def view_loan_details(user_details):
@@ -70,9 +72,10 @@ def view_loan_details(user_details):
 
 def approve_loan(customer_loan_details):
     if (
-        "admin_name" in customer_loan_details
+        check_name_and_password_are_provided(customer_loan_details)
+        and authenticate_user(customer_loan_details)
+        and customer_loan_details["name"] == "admin"
         and "customer_name" in customer_loan_details
-        and customer_loan_details["admin_name"] == "admin"
     ):
         loan = get_loan_information_storage_instance().get_loan_info(
             customer_loan_details["customer_name"]
@@ -87,4 +90,4 @@ def approve_loan(customer_loan_details):
         else:
             return "No Loan Found for Customer"
     else:
-        return "Either you're not logged in as Admin or provide correct details of the loan"
+        return "Either you're not logged in as Admin or provide correct customer_name of the loan"
